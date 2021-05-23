@@ -28,8 +28,7 @@ const readDepartment = () => {
 };
 
 
-const queryNamesOfEmployees = () => {
-
+const DeleteEmployee = () => {
   var fullNames = [];
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
   let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
@@ -37,17 +36,44 @@ const queryNamesOfEmployees = () => {
     if (err) throw err;
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
     res.forEach(function(item){
-      fullNames.push(item)
+      fullNames.push(item.full_name)
     });
-  });
+
+    const delEmplQuestions = [
+      {
+        type: 'list',
+        message: 'What is name of employee to be deleted?',
+        name: 'employee',
+        choices: fullNames
+      }];
+
+    var firstName;
+    var lastName;
+    inquirer
+      .prompt(delEmplQuestions)
+      .then((answer) => {
+        let str = answer.employee;
+        let substrings = str.split(' ');
+        firstName = substrings[0];
+        lastName = substrings[1];
+        let query2 = `DELETE FROM employee WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
+        connection.query(query2, function (err2, result2) {
+          if (err2) throw err2;
+          // After we delete an employee show the table
+          //queryAllEmployees()
+          mainMenu();
+        });
+      });   // End of .then
+  });   // End of first connection.query
 }
 
-
+// Displays formatted table of employees
 const queryAllEmployees = () => {
   let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id ';
   query += 'FROM employee ';
   query += 'JOIN role ON employee.role_id=role.role_id ';
   query += 'JOIN department ON role.department_id=department.department_id ';
+  query += 'ORDER by id'
   connection.query( query, (err, res) => {
       if (err) throw err;
 
@@ -60,7 +86,7 @@ const queryAllEmployees = () => {
   });
 }
 
-// Create an array of questions for user input
+// Create an array of questions for user input during add employee
 const addEmpQuestions = [
   {
       type: 'input',
@@ -79,54 +105,6 @@ const addEmpQuestions = [
       choices: ["Sales", "Engineering", "Finance", "Legal"]
   }
 ];
-
-const deleteEmployee = () => {
-  // Which employee do you want to remove
-  // Create array of emplyees
-  // Get first and last name we can use to create a list for
-  var fullNames = [];
-  //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
-  let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
-  connection.query( query, (err, res) => {
-    if (err) throw err;
-    // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
-    res.forEach(function(item){
-      fullNames.push(item.full_name)
-    });
-    console.log(fullNames)
-  });
-  console.log("1 begin fullNames")
-  console.log(fullNames);
-  console.log("1 begin fullNames")
-
-  const delEmplQuestions = [
-    {
-      type: 'list',
-      message: 'What is name of employee to be deleted?',
-      name: 'employee',
-      //choices: ['Bill Pate', 'Daffy Duck']
-      choices: fullNames
-    }];
-  console.log("2 begin")
-  console.log(delEmplQuestions[0].choices);
-  console.log('2 end')
-  inquirer
-    .prompt(delEmplQuestions)
-    .then((answer) => {
-      console.log("inquirer answer")
-      console.log(answer)
-      /*
-      connection.query(
-        `DELETE FROM employee WHERE first_name = ${first} AND last_name = ${last}`,
-
-        (err) => {
-          if (err) throw err;
-          console.log('Your employee was inserted into employee table successfully!');
-        }
-      );  // end of query insert into employee
-      */
-    });
-}
 
 // User wants to add employee to Employee table
 // Has two inquirer prompts?
@@ -216,25 +194,24 @@ const addEmployee = () => {
           }
 
           // when finished prompting, insert a new item into employee table that info
-          connection.query(
-            'INSERT INTO employee SET ?',
+          connection.query('INSERT INTO employee SET ?',
             {
               first_name: answer.firstname,
               last_name: answer.lastname,
               role_id: role_id,
               manager_id: null
-            },
-            (err) => {
+            }, (err) => {
               if (err) throw err;
               console.log('Your employee was inserted into employee table successfully!');
+              mainMenu();
             }
           );  // end of query insert into employee
-          mainMenus();
+
         });
     });
 }
 
-const mainMenus = () => {
+const mainMenu = () => {
   inquirer
     .prompt({
       name: 'action',
@@ -243,7 +220,7 @@ const mainMenus = () => {
       choices: [
         'View All Employees',
         'Add Employee',
-        'Remove Employee',
+        'Delete Employee',
         'Exit'
       ],
     })
@@ -257,9 +234,8 @@ const mainMenus = () => {
           addEmployee();
           break;
 
-        case 'Remove Employee':
-          deleteEmployee();
-          connection.end();
+        case 'Delete Employee':
+          DeleteEmployee();
           break;
 
         case 'Exit':
@@ -273,7 +249,7 @@ const mainMenus = () => {
     });
 };
 
-mainMenus();
+mainMenu();
 
 
 /*
