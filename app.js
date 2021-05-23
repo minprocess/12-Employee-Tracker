@@ -16,6 +16,7 @@ const connection = mysql.createConnection({
   database: 'employee_db',
 });
 
+// Only for testing purposes
 const readDepartment = () => {
   connection.query('SELECT * FROM department', (err, res) => {
     if (err) throw err;
@@ -26,20 +27,36 @@ const readDepartment = () => {
   });
 };
 
+
+const queryNamesOfEmployees = () => {
+
+  var fullNames = [];
+  //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
+  let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
+  connection.query( query, (err, res) => {
+    if (err) throw err;
+    // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
+    res.forEach(function(item){
+      fullNames.push(item)
+    });
+  });
+}
+
+
 const queryAllEmployees = () => {
-  let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary ';
+  let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id ';
   query += 'FROM employee ';
   query += 'JOIN role ON employee.role_id=role.role_id ';
   query += 'JOIN department ON role.department_id=department.department_id ';
   connection.query( query, (err, res) => {
       if (err) throw err;
+
       var values = [];
-      
-      res.forEach(({ id, first_name, last_name, title, name, salary }) => {
-          let val = [id, first_name, last_name, title, name, salary];
-          values.push(val)
+      res.forEach(({ id, first_name, last_name, title, name, salary, manager }) => {
+          let val = [id, first_name, last_name, title, name, salary, manager];
+          values.push(val);
       });
-      console.table(['id', 'first name', 'last name', 'title', 'department', 'salary'], values)
+      console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values)
   });
 }
 
@@ -56,14 +73,61 @@ const addEmpQuestions = [
       name: 'lastname',
   },
   {
-      type: 'choices',
+      type: 'list',
       message: 'What is department?',
       name: 'department',
       choices: ["Sales", "Engineering", "Finance", "Legal"]
   }
 ];
 
+const deleteEmployee = () => {
+  // Which employee do you want to remove
+  // Create array of emplyees
+  // Get first and last name we can use to create a list for
+  var fullNames = [];
+  //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
+  let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
+  connection.query( query, (err, res) => {
+    if (err) throw err;
+    // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
+    res.forEach(function(item){
+      fullNames.push(item.full_name)
+      console.log(fullName.length);
+    });
+  });
+  console.log("fullNames")
+  console.log(fullNames);
+  const delEmplQuestions = [
+    {
+      type: 'list',
+      message: 'What is name of employee to be deleted?',
+      name: 'employee',
+      choices: fullNames
+    }];
+  //console.log("begin")
+  //console.log(delEmplQuestions.choices);
+  console.log('end')
+  inquirer
+    .prompt(delEmplQuestions)
+    .then((answer) => {
+      console.log("inquirer answer")
+      console.log(answer)
+      /*
+      connection.query(
+        `DELETE FROM employee WHERE first_name = ${first} AND last_name = ${last}`,
 
+        (err) => {
+          if (err) throw err;
+          console.log('Your employee was inserted into employee table successfully!');
+        }
+      );  // end of query insert into employee
+      */
+    });
+}
+
+// User wants to add employee to Employee table
+// Has two inquirer prompts?
+// After last .then MainMenu is called (recursively!)
 const addEmployee = () => {
   inquirer
     .prompt(addEmpQuestions)
@@ -162,32 +226,10 @@ const addEmployee = () => {
               console.log('Your employee was inserted into employee table successfully!');
             }
           );  // end of query insert into employee
+          mainMenus();
         });
     });
 }
-
-/*
-    .then((answer) => {
-      // when finished prompting, insert a new item into the db with that info
-      connection.query(
-        'INSERT INTO auctions SET ?',
-        // QUESTION: What does the || 0 do?
-        {
-          item_name: answer.item,
-          category: answer.category,
-          starting_bid: answer.startingBid || 0,
-          highest_bid: answer.startingBid || 0,
-        },
-        (err) => {
-          if (err) throw err;
-          console.log('Your auction was created successfully!');
-          // re-prompt the user for if they want to bid or post
-          start();
-        }
-      );
-    });
-*/
-
 
 const mainMenus = () => {
   inquirer
@@ -213,7 +255,8 @@ const mainMenus = () => {
           break;
 
         case 'Remove Employee':
-          RemoveEmployee();
+          deleteEmployee();
+          connection.end();
           break;
 
         case 'Exit':
@@ -227,14 +270,15 @@ const mainMenus = () => {
     });
 };
 
+mainMenus();
 
 
-
-
+/*
 connection.connect((err) => {
   if (err) throw err;
   console.log(`connected as id ${connection.threadId}`);
   //readDepartment();
   queryAllEmployees();
 });
+*/
 
