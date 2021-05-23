@@ -28,6 +28,139 @@ const readDepartment = () => {
 };
 
 
+// Create an array of questions for user input during add employee
+const addEmpQuestions = [
+  {
+      type: 'input',
+      message: 'What is first name?',
+      name: 'firstname',
+  },
+  {
+      type: 'input',
+      message: 'What is last name?',
+      name: 'lastname',
+  },
+  {
+      type: 'list',
+      message: 'What is department?',
+      name: 'department',
+      choices: ["Sales", "Engineering", "Finance", "Legal"]
+  }
+];
+
+// To change role of employee
+// 1. Ask user to select the employee to change
+// 2. Ask user what is the department of new role
+// 3. Ask user what is title in the department.
+// 4. Change role_id in employee table
+// Has three inquirer prompts
+// After last .then MainMenu is called (recursively!)
+const addEmployee = () => {
+  // STEP 1. Select employee
+  var fullNames = [];
+  //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
+  let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
+  connection.query( query, (err, res) => {
+    if (err) throw err;
+    // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
+    res.forEach(function(item){
+      fullNames.push(item.full_name)
+    });
+    const delEmplQuestions = [
+      {
+        type: 'list',
+        message: 'What is name of employee with new role?',
+        name: 'employee',
+        choices: fullNames
+      }];
+    var firstName;
+    var lastName;
+    inquirer
+      .prompt(delEmplQuestions)
+      .then((answer) => {
+        let str = answer.employee;
+        let substrings = str.split(' ');
+        firstName = substrings[0];
+        lastName = substrings[1];
+
+        const whatDeptQuestions = [
+          {
+            type: 'list',
+            message: 'What is department?',
+            name: 'department',
+            choices: ["Sales", "Engineering", "Finance", "Legal"]
+        }];
+        inquirer
+        .prompt(whatDeptQuestions)
+        .then((answer) => {
+          var role_id;
+          switch (answer.department) {
+            case 'Sales':
+              choicesPos = ["Sales Lead", "Salesperson"];
+              break;
+            case 'Engineering':
+              choicesPos = ["Lead Engineer", "Software Engineer"];
+              break;
+            case 'Finance':
+              choicesPos = ["Accountant"];
+              break;
+            case 'Legal':
+              choicesPos = ["Legal Team Lead", "Lawyer"];
+              break;
+            default:
+              console.log(`Invalid action answer.department: ${answer.department}`);
+              break;
+          }
+          let posQuestions = [
+            {
+              type: 'choices',
+              message: 'What is new position',
+              name: 'position',
+              choices: choicesPos
+            }
+          ];
+
+          inquirer
+            .prompt(posQuestions)
+            .then((answer2) => {
+              switch (answer2.position) {
+                case 'Sales Lead':
+                  role_id = 1;
+                  break;
+                case 'Salesperson':
+                  role_id = 2;
+                  break;
+                case 'Lead Engineer':
+                  role_id = 3;
+                  break;
+                case 'Software Engineer':
+                  role_id = 4;
+                  break;
+                case 'Finance':
+                  role_id = 5;
+                  break;
+                case 'Legal Team Lead':
+                  role_id = 6;
+                  break;
+                case 'Lawyer':
+                  role_id = 7;
+                  break;
+                default:
+                  console.log(`Invalid action answer2.position: ${answer2.position}`);
+                  break;
+              }
+              var sql = `UPDATE employee SET role_id = ${role_id} WHERE first_name = ${firstName} AND last_name = ${lastName}`;
+              con.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log(result.affectedRows + " record(s) updated");
+                mainMenu();
+              });
+            }); 
+          });
+        });   // End of .then
+  });   // End of first connection.query
+}
+
 const DeleteEmployee = () => {
   var fullNames = [];
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
@@ -65,7 +198,7 @@ const DeleteEmployee = () => {
         });
       });   // End of .then
   });   // End of first connection.query
-}
+}   // End of DeleteEmployee
 
 // Displays formatted table of employees
 const queryAllEmployees = () => {
@@ -85,6 +218,7 @@ const queryAllEmployees = () => {
       console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values)
   });
 }
+
 
 // Create an array of questions for user input during add employee
 const addEmpQuestions = [
@@ -118,24 +252,16 @@ const addEmployee = () => {
       switch (answer.department) {
         case 'Sales':
           choicesPos = ["Sales Lead", "Salesperson"];
-          department_id = 1;
           break;
-
         case 'Engineering':
           choicesPos = ["Lead Engineer", "Software Engineer"];
-          department_id = 2;
           break;
-
         case 'Finance':
           choicesPos = ["Accountant"];
-          department_id = 3;
           break;
-
         case 'Legal':
           choicesPos = ["Legal Team Lead", "Lawyer"];
-          department_id = 4;
           break;
-
         default:
           console.log(`Invalid action answer.department: ${answer.department}`);
           break;
@@ -155,39 +281,25 @@ const addEmployee = () => {
           switch (answer2.position) {
             case 'Sales Lead':
               role_id = 1;
-              salary = 100000;
               break;
-
             case 'Salesperson':
               role_id = 2;
-              salary = 80000;
               break;
-      
             case 'Lead Engineer':
               role_id = 3;
-              salary = 150000;
               break;
-
             case 'Software Engineer':
               role_id = 4;
-              salary = 120000;
               break;
-      
             case 'Finance':
               role_id = 5;
-              salary = 125000;
               break;
-    
             case 'Legal Team Lead':
               role_id = 6;
-              salary = 250000;
               break;
-    
             case 'Lawyer':
               role_id = 7;
-              salary = 190000;
               break;
-      
             default:
               console.log(`Invalid action answer2.position: ${answer2.position}`);
               break;
@@ -209,7 +321,7 @@ const addEmployee = () => {
 
         });
     });
-}
+}   // End of Add Employee
 
 const mainMenu = () => {
   inquirer
@@ -221,6 +333,7 @@ const mainMenu = () => {
         'View All Employees',
         'Add Employee',
         'Delete Employee',
+        'Change Role of Employee',
         'Exit'
       ],
     })
@@ -238,6 +351,10 @@ const mainMenu = () => {
           DeleteEmployee();
           break;
 
+          case 'Change Role of Employee':
+            ChangeRoleOfEmployee();
+            break;
+  
         case 'Exit':
           connection.end();
           break;
