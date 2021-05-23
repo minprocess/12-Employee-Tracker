@@ -92,21 +92,24 @@ const deleteEmployee = () => {
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
     res.forEach(function(item){
       fullNames.push(item.full_name)
-      console.log(fullName.length);
     });
+    console.log(fullNames)
   });
-  console.log("fullNames")
+  console.log("1 begin fullNames")
   console.log(fullNames);
+  console.log("1 begin fullNames")
+
   const delEmplQuestions = [
     {
       type: 'list',
       message: 'What is name of employee to be deleted?',
       name: 'employee',
+      //choices: ['Bill Pate', 'Daffy Duck']
       choices: fullNames
     }];
-  //console.log("begin")
-  //console.log(delEmplQuestions.choices);
-  console.log('end')
+  console.log("2 begin")
+  console.log(delEmplQuestions[0].choices);
+  console.log('2 end')
   inquirer
     .prompt(delEmplQuestions)
     .then((answer) => {
