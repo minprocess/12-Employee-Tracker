@@ -32,6 +32,8 @@ Clone this project to your PC. Install mysql and Workbench. Use npm i to install
 Here is the link to the GitHub repo. The GitHub repo will have a mp4 recording of the app being used.
 
 [https://github.com/minprocess/12-Employee-Tracker](https://github.com/minprocess/12-Employee-Tracker)
+
+The MP4 recording is in the assets folder.
 ## Usage
 First copy the contents of sql into Workbench then create the employee, role and department tables
 Then start the app with node app
