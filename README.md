@@ -29,6 +29,8 @@ If your README is long, add a table of contents to make it easy for users to fin
 - [License](#license)
 ## Installation
 Clone this project to your PC. Install mysql and Workbench. Use npm i to install dependencies which are inquirer, mysql and console.table
+Here is the link to the GitHub repo
+[https://github.com/minprocess/12-Employee-Tracker](https://github.com/minprocess/12-Employee-Tracker)
 ## Usage
 First copy the contents of sql into Workbench then create the employee, role and department tables
 Then start the app with node app
