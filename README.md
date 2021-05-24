@@ -2,20 +2,25 @@
 
 ## Description
 
-Build a command-line application that at a minimum allows the user to:
+This is a command-line application that allows the user to interface with a database with company employees:
 
-  * Add departments, roles, employees
+## Minimum Viable Product
+Feature | Implemented
+---|---|
+Add departments | No
+Add roles | Yes
+Add employees Yes
+View departments | No
+View roles | No
+View employees | Yes
+Update employee roles | Yes
 
-  * View departments, roles, employees
+Bonus features
+Feature | Implemented
+---|---|
+Delete Employees | Yes
 
-  * Update employee roles
-
-
-Provide a short description explaining the what, why, and how of your project. Use the following questions as a guide:
-- What was your motivation?
-- Why did you build this project? (Note: the answer is not "Because it was a homework assignment.")
-- What problem does it solve?
-- What did you learn?
+The code in this application could be improved quite a bit. It could be shortend a lot, I think. I will have to do that as well as add the MVP features I couldn't implment then resubmit
 ## Table of Contents (Optional)
 If your README is long, add a table of contents to make it easy for users to find what they need.
 - [Installation](#installation)
@@ -23,8 +28,13 @@ If your README is long, add a table of contents to make it easy for users to fin
 - [Credits](#credits)
 - [License](#license)
 ## Installation
-What are the steps required to install your project? Provide a step-by-step description of how to get the development environment running.
+Clone this project to your PC. Install mysql and Workbench. Use npm i to install dependencies which are inquirer, mysql and console.table
 ## Usage
+First copy the contents of sql into Workbench then create the employee, role and department tables
+Then start the app with node app
+You will be presented with the following choices
+![Main menu of Employee Tracker](./assets/Main_menu_of_Employee-Tracker.png)
+
 Provide instructions and examples for use. Include screenshots as needed.
 To add a screenshot, create an `assets/images` folder in your repository and upload your screenshot to it. Then, using the relative filepath, add it to your README using the following syntax:
     ```md

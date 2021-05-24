@@ -82,7 +82,7 @@ const addNewRole = () => {
               {
                 title: new_role,
                 salary: new_salary,
-                department_id: dept_id;
+                department_id: dept_id
               }, (err) => {
                 if (err) throw err;
                 console.log('The new role was inserted into role table successfully!');
@@ -220,7 +220,8 @@ const viewAllEmployees = () => {
           let val = [id, first_name, last_name, title, name, salary, manager];
           values.push(val);
       });
-      console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values)
+      console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values);
+      setTimeout(function(){mainMenu(); }, 1000);
   });
 }
 
