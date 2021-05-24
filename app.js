@@ -80,8 +80,8 @@ const addNewRole = () => {
             }
             connection.query('INSERT INTO role SET ?',
               {
-                title: new_role,
-                salary: new_salary,
+                title: newRole,
+                salary: newSalary,
                 department_id: dept_id
               }, (err) => {
                 if (err) throw err;
@@ -112,7 +112,7 @@ const changeRole = () => {
   connection.query( query, (err, res) => {
     if (err) throw err;
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
-    res.forEach(function(item){
+    res.forEach(function(item) {
       fullNames.push(item.full_name)
     });
     const employeeNameQuestions = [
@@ -139,23 +139,23 @@ const changeRole = () => {
 
           let roleQuestions = [
             {
-              type: 'choices',
+              type: 'list',
               message: 'What is new role of employee',
               name: 'new_role',
-              choices: roles
+              choices: titles
             }
           ];
           var new_role_id = 0;
           inquirer
-            .prompt(posQuestions)
+            .prompt(roleQuestions)
             .then((answer) => {
               for (i=0; i<titles.length; i++) {
                 if (answer.new_role == titles[i]) {
                   new_role_id = i+1;
                 }
               }   // end of for loop
-              var sql = `UPDATE employee SET role_id = ${role_id} WHERE first_name = ${firstName} AND last_name = ${lastName}`;
-              con.query(sql, function (err, result) {
+              var sql = `UPDATE employee SET role_id = ${new_role_id} WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
+              connection.query(sql, function (err, result) {
                 if (err) throw err;
                 console.log(result.affectedRows + " record(s) updated");
                 setTimeout(function(){mainMenu(); }, 1000);
@@ -231,8 +231,8 @@ const addEmployee = () => {
   var roleChoices = [];
   connection.query('SELECT * FROM role', (err, res) => {
     if (err) throw err;
-      res.forEach(function(item) {
-      roleChoices.push(item.name)
+    res.forEach(function(item) {
+      roleChoices.push(item.title)
     });
 
     // Create an array of questions for user input during add employee
@@ -316,9 +316,13 @@ const mainMenu = () => {
           break;
 
         case 'Change Role of Employee':
-          changeRole;
+          changeRole();
           break;
-  
+
+        case 'Add New Role':
+          addNewRole();
+          break;
+    
         case 'Exit':
           connection.end();
           break;
@@ -333,12 +337,4 @@ const mainMenu = () => {
 mainMenu();
 
 
-/*
-connection.connect((err) => {
-  if (err) throw err;
-  console.log(`connected as id ${connection.threadId}`);
-  //readDepartment();
-  queryAllEmployees();
-});
-*/
 
