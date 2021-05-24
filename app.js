@@ -86,7 +86,7 @@ const addNewRole = () => {
               }, (err) => {
                 if (err) throw err;
                 console.log('The new role was inserted into role table successfully!');
-                mainMenu();
+                setTimeout(function(){mainMenu(); }, 1000);
               }
             );  // end of query insert into employee
 
@@ -158,7 +158,7 @@ const changeRole = () => {
               con.query(sql, function (err, result) {
                 if (err) throw err;
                 console.log(result.affectedRows + " record(s) updated");
-                mainMenu();
+                setTimeout(function(){mainMenu(); }, 1000);
               });
             });   // end of .then
         })
@@ -197,9 +197,8 @@ const deleteEmployee = () => {
         let query2 = `DELETE FROM employee WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
         connection.query(query2, function (err2, result2) {
           if (err2) throw err2;
-          // After we delete an employee show the table
-          //queryAllEmployees()
-          mainMenu();
+
+          setTimeout(function(){mainMenu(); }, 1000);
         });
       });   // End of .then
   });   // End of first connection.query
@@ -224,9 +223,6 @@ const viewAllEmployees = () => {
       setTimeout(function(){mainMenu(); }, 1000);
   });
 }
-
-
-
 
 // User wants to add employee to Employee table
 // Has two inquirer prompts?
@@ -282,7 +278,7 @@ const addEmployee = () => {
         }, (err) => {
         if (err) throw err;
         console.log('Your employee was inserted into employee table successfully!');
-        mainMenu();
+        setTimeout(function(){mainMenu(); }, 1000);
         }
       );  // end of query insert into employee
 
