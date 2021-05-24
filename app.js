@@ -1,3 +1,10 @@
+// addnewRole()
+// changeRole() of employee
+// deleteEmployee()
+// viewAllEmployees()
+// addEmployee()
+
+
 const mysql = require('mysql');
 const cTable = require('console.table');
 const inquirer = require('inquirer');
@@ -27,35 +34,77 @@ const readDepartment = () => {
   });
 };
 
+const addNewRole = () => {
+  // 1. What is name of new role
+  const newRoleQuestion = [
+    {
+      type: 'input',
+      message: 'What is name new role?',
+      name: 'new_role',
+    },
+    {
+      type: 'number',
+      message: 'What is salary',
+      name: 'new_salary'
+    }
+  ];
+  inquirer
+    .prompt(newRoleQuestion)
+    .then((answer) => {
+      var newRole = answer.new_role;
+      var newSalary = answer.new_salary
+      var deptChoices = [];
+      connection.query('SELECT * FROM department', (err, res) => {
+        if (err) throw err;
+        res.forEach(function(item){
+          deptChoices.push(item.name)
+        });    
 
-// Create an array of questions for user input during add employee
-const addEmpQuestions = [
-  {
-      type: 'input',
-      message: 'What is first name?',
-      name: 'firstname',
-  },
-  {
-      type: 'input',
-      message: 'What is last name?',
-      name: 'lastname',
-  },
-  {
-      type: 'list',
-      message: 'What is department?',
-      name: 'department',
-      choices: ["Sales", "Engineering", "Finance", "Legal"]
-  }
-];
+        const whatDeptQuestions = [
+          {
+            type: 'list',
+            message: 'What department is the new role in?',
+            name: 'department',
+            choices: deptChoices
+        }];
+        inquirer
+          .prompt(whatDeptQuestions)
+          .then((answer) => {
+            // when finished prompting, insert a new item into role table with that info
+            var dept_id = 0;
+            var i;
+            for (i=0; i<deptChoices.length; i++) {
+              if (answer.department == deptChoices[i]) {
+                dept_id = i+1;
+              }
+            }
+            connection.query('INSERT INTO role SET ?',
+              {
+                title: new_role,
+                salary: new_salary,
+                department_id: dept_id;
+              }, (err) => {
+                if (err) throw err;
+                console.log('The new role was inserted into role table successfully!');
+                mainMenu();
+              }
+            );  // end of query insert into employee
+
+          });
+        //connection.end();
+      });
+
+
+    });
+}
+
 
 // To change role of employee
 // 1. Ask user to select the employee to change
-// 2. Ask user what is the department of new role
-// 3. Ask user what is title in the department.
-// 4. Change role_id in employee table
-// Has three inquirer prompts
+// 2. Ask user what is new role of employee.
+// 3. Change role_id in employee table
 // After last .then MainMenu is called (recursively!)
-const addEmployee = () => {
+const changeRole = () => {
   // STEP 1. Select employee
   var fullNames = [];
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
@@ -66,7 +115,7 @@ const addEmployee = () => {
     res.forEach(function(item){
       fullNames.push(item.full_name)
     });
-    const delEmplQuestions = [
+    const employeeNameQuestions = [
       {
         type: 'list',
         message: 'What is name of employee with new role?',
@@ -76,92 +125,48 @@ const addEmployee = () => {
     var firstName;
     var lastName;
     inquirer
-      .prompt(delEmplQuestions)
+      .prompt(employeeNameQuestions)
       .then((answer) => {
         let str = answer.employee;
         let substrings = str.split(' ');
         firstName = substrings[0];
         lastName = substrings[1];
+        var titles = [];
+        connection.query( 'SELECT * FROM role ', (err, res) => {
+          res.forEach(function(item){
+            titles.push(item.title);
+          });
 
-        const whatDeptQuestions = [
-          {
-            type: 'list',
-            message: 'What is department?',
-            name: 'department',
-            choices: ["Sales", "Engineering", "Finance", "Legal"]
-        }];
-        inquirer
-        .prompt(whatDeptQuestions)
-        .then((answer) => {
-          var role_id;
-          switch (answer.department) {
-            case 'Sales':
-              choicesPos = ["Sales Lead", "Salesperson"];
-              break;
-            case 'Engineering':
-              choicesPos = ["Lead Engineer", "Software Engineer"];
-              break;
-            case 'Finance':
-              choicesPos = ["Accountant"];
-              break;
-            case 'Legal':
-              choicesPos = ["Legal Team Lead", "Lawyer"];
-              break;
-            default:
-              console.log(`Invalid action answer.department: ${answer.department}`);
-              break;
-          }
-          let posQuestions = [
+          let roleQuestions = [
             {
               type: 'choices',
-              message: 'What is new position',
-              name: 'position',
-              choices: choicesPos
+              message: 'What is new role of employee',
+              name: 'new_role',
+              choices: roles
             }
           ];
-
+          var new_role_id = 0;
           inquirer
             .prompt(posQuestions)
-            .then((answer2) => {
-              switch (answer2.position) {
-                case 'Sales Lead':
-                  role_id = 1;
-                  break;
-                case 'Salesperson':
-                  role_id = 2;
-                  break;
-                case 'Lead Engineer':
-                  role_id = 3;
-                  break;
-                case 'Software Engineer':
-                  role_id = 4;
-                  break;
-                case 'Finance':
-                  role_id = 5;
-                  break;
-                case 'Legal Team Lead':
-                  role_id = 6;
-                  break;
-                case 'Lawyer':
-                  role_id = 7;
-                  break;
-                default:
-                  console.log(`Invalid action answer2.position: ${answer2.position}`);
-                  break;
-              }
+            .then((answer) => {
+              for (i=0; i<titles.length; i++) {
+                if (answer.new_role == titles[i]) {
+                  new_role_id = i+1;
+                }
+              }   // end of for loop
               var sql = `UPDATE employee SET role_id = ${role_id} WHERE first_name = ${firstName} AND last_name = ${lastName}`;
               con.query(sql, function (err, result) {
                 if (err) throw err;
                 console.log(result.affectedRows + " record(s) updated");
                 mainMenu();
               });
-            }); 
-          });
-        });   // End of .then
-  });   // End of first connection.query
+            });   // end of .then
+        })
+      });
+  });
 }
 
-const DeleteEmployee = () => {
+const deleteEmployee = () => {
   var fullNames = [];
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
   let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
@@ -201,7 +206,7 @@ const DeleteEmployee = () => {
 }   // End of DeleteEmployee
 
 // Displays formatted table of employees
-const queryAllEmployees = () => {
+const viewAllEmployees = () => {
   let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id ';
   query += 'FROM employee ';
   query += 'JOIN role ON employee.role_id=role.role_id ';
@@ -220,107 +225,68 @@ const queryAllEmployees = () => {
 }
 
 
-// Create an array of questions for user input during add employee
-const addEmpQuestions = [
-  {
-      type: 'input',
-      message: 'What is first name?',
-      name: 'firstname',
-  },
-  {
-      type: 'input',
-      message: 'What is last name?',
-      name: 'lastname',
-  },
-  {
-      type: 'list',
-      message: 'What is department?',
-      name: 'department',
-      choices: ["Sales", "Engineering", "Finance", "Legal"]
-  }
-];
+
 
 // User wants to add employee to Employee table
 // Has two inquirer prompts?
 // After last .then MainMenu is called (recursively!)
 const addEmployee = () => {
+  var roleChoices = [];
+  connection.query('SELECT * FROM role', (err, res) => {
+    if (err) throw err;
+      res.forEach(function(item) {
+      roleChoices.push(item.name)
+    });
+
+    // Create an array of questions for user input during add employee
+    const addEmpQuestions = [
+      {
+          type: 'input',
+          message: 'What is first name?',
+          name: 'firstname',
+      },
+      {
+          type: 'input',
+          message: 'What is last name?',
+          name: 'lastname',
+      },
+      {
+          type: 'list',
+          message: 'What is role?',
+          name: 'role',
+          choices: roleChoices
+      }
+    ];
   inquirer
     .prompt(addEmpQuestions)
     .then((answer) => {
-      var department_id;
-      var role_id;
-      switch (answer.department) {
-        case 'Sales':
-          choicesPos = ["Sales Lead", "Salesperson"];
-          break;
-        case 'Engineering':
-          choicesPos = ["Lead Engineer", "Software Engineer"];
-          break;
-        case 'Finance':
-          choicesPos = ["Accountant"];
-          break;
-        case 'Legal':
-          choicesPos = ["Legal Team Lead", "Lawyer"];
-          break;
-        default:
-          console.log(`Invalid action answer.department: ${answer.department}`);
-          break;
-      }
-      let posQuestions = [
-        {
-          type: 'choices',
-          message: 'What is position',
-          name: 'position',
-          choices: choicesPos
+      var firstName = answer.firstname;
+      var lastName = answer.lastname;
+      var title = answer.role;
+      // Find role_id from title
+      var role_id = 0;
+      for (i=0; i<roleChoices.length; i++) {
+        if (title == roleChoices[i]) {
+          role_id = i+1;
         }
-      ];
+      }
 
-      inquirer
-        .prompt(posQuestions)
-        .then((answer2) => {
-          switch (answer2.position) {
-            case 'Sales Lead':
-              role_id = 1;
-              break;
-            case 'Salesperson':
-              role_id = 2;
-              break;
-            case 'Lead Engineer':
-              role_id = 3;
-              break;
-            case 'Software Engineer':
-              role_id = 4;
-              break;
-            case 'Finance':
-              role_id = 5;
-              break;
-            case 'Legal Team Lead':
-              role_id = 6;
-              break;
-            case 'Lawyer':
-              role_id = 7;
-              break;
-            default:
-              console.log(`Invalid action answer2.position: ${answer2.position}`);
-              break;
-          }
+      // when finished prompting, insert a new item into employee table that info
+      connection.query('INSERT INTO employee SET ?',
+        {
+          first_name: answer.firstname,
+          last_name: answer.lastname,
+          role_id: role_id,
+          manager_id: null
+        }, (err) => {
+        if (err) throw err;
+        console.log('Your employee was inserted into employee table successfully!');
+        mainMenu();
+        }
+      );  // end of query insert into employee
 
-          // when finished prompting, insert a new item into employee table that info
-          connection.query('INSERT INTO employee SET ?',
-            {
-              first_name: answer.firstname,
-              last_name: answer.lastname,
-              role_id: role_id,
-              manager_id: null
-            }, (err) => {
-              if (err) throw err;
-              console.log('Your employee was inserted into employee table successfully!');
-              mainMenu();
-            }
-          );  // end of query insert into employee
-
-        });
     });
+  });
 }   // End of Add Employee
 
 const mainMenu = () => {
@@ -334,13 +300,14 @@ const mainMenu = () => {
         'Add Employee',
         'Delete Employee',
         'Change Role of Employee',
+        'Add New Role',
         'Exit'
       ],
     })
     .then((answer) => {
       switch (answer.action) {
         case 'View All Employees':
-          queryAllEmployees();
+          viewAllEmployees();
           break;
 
         case 'Add Employee':
@@ -348,12 +315,12 @@ const mainMenu = () => {
           break;
 
         case 'Delete Employee':
-          DeleteEmployee();
+          deleteEmployee();
           break;
 
-          case 'Change Role of Employee':
-            ChangeRoleOfEmployee();
-            break;
+        case 'Change Role of Employee':
+          changeRole;
+          break;
   
         case 'Exit':
           connection.end();
