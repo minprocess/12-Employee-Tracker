@@ -32,16 +32,16 @@ INSERT INTO department (name) VALUES
 
 INSERT INTO role (title, salary, department_id) VALUES 
     ("Sales Lead" ,100000, 1), ("Salesperson", 80000, 1), ("Lead Engineer", 150000, 2), ("Software Engineer", 120000, 2),
-    ("Accountant", 125000, 3), ("Legal Team Lead", 250000, 4), ("Lawyer", 190000, 4);
+    ("Accountant", 125000, 3), ("Legal Team Lead", 250000, 4), ("Lawyer", 190000, 4), ("Lead Accountant", 125000, 3);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES
 ("John", "Doe", 1, null),
-("Mike", "Chan", 2, null),
+("Mike", "Chan", 2, 1),
 ("Ashley", "Rodriguez", 3, null),
-("Kevin", "Tupik", 4, null),
-("Malia", "Brown", 5, null),
+("Kevin", "Tupik", 4, 3),
+("Michael", "Scott", 8, null),
+("Malia", "Brown", 5, 5),
 ("Sarah", "Lourd", 6, null),
-("Tom", "Allen", 7, null),
+("Tom", "Allen", 7, 7),
 ("Christian", "Echenrode", 3, null),
-("Donald", "Duck", 3, 2),
-("Mickey", "Mouse", 2, 1);
+("Jim", "Halpert", 4, 9);

@@ -104,16 +104,19 @@ const addNewRole = () => {
 // 2. Ask user what is new role of employee.
 // 3. Change role_id in employee table
 // After last .then MainMenu is called (recursively!)
+
 const changeRole = () => {
   // STEP 1. Select employee
   var fullNames = [];
+  var employeeIds = [];
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
-  let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
-  connection.query( query, (err, res) => {
+  let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name, id FROM employee";
+  connection.query( query, async function (err, res) {
     if (err) throw err;
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
-    res.forEach(function(item) {
-      fullNames.push(item.full_name)
+    await res.forEach(function(item) {
+      fullNames.push(item.full_name);
+      employeeIds.push(item.id);
     });
     const employeeNameQuestions = [
       {
@@ -132,8 +135,10 @@ const changeRole = () => {
         firstName = substrings[0];
         lastName = substrings[1];
         var titles = [];
-        connection.query( 'SELECT * FROM role ', (err, res) => {
+        var roleIds = [];
+        connection.query( 'SELECT role_id, title FROM role ', (err, res) => {
           res.forEach(function(item){
+            roleIds.push(item.role_id)
             titles.push(item.title);
           });
 
@@ -151,7 +156,7 @@ const changeRole = () => {
             .then((answer) => {
               for (i=0; i<titles.length; i++) {
                 if (answer.new_role == titles[i]) {
-                  new_role_id = i+1;
+                  new_role_id = roleIds[i];
                 }
               }   // end of for loop
               var sql = `UPDATE employee SET role_id = ${new_role_id} WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
@@ -165,6 +170,80 @@ const changeRole = () => {
       });
   });
 }
+  
+// To change manager of employee
+// 1. Ask user to select the employee to change
+// 2. Ask user who is new manager of employee.
+// 3. Change manager in employee table
+// After last .then MainMenu is called (recursively!)
+const changeManager = () => {
+  // STEP 1. Select employee
+  var fullNames = [];
+  var employeeIds = [];
+  //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
+  let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name, id FROM employee";
+  connection.query( query, async function (err, res) {
+    if (err) throw err;
+    // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
+    await res.forEach(function(item) {
+      fullNames.push(item.full_name);
+      employeeIds.push(item.id);
+    });
+    const employeeNameQuestions = [
+      {
+        type: 'list',
+        message: 'What is name of employee with new manager?',
+        name: 'employee',
+        choices: fullNames
+      }];
+    var firstName;
+    var lastName;
+    inquirer
+      .prompt(employeeNameQuestions)
+      .then((answer) => {
+        let str = answer.employee;
+        let substrings = str.split(' ');
+        firstName = substrings[0];
+        lastName = substrings[1];
+
+        let managerChoices = fullNames;
+        let managerIds = employeeIds;
+        managerChoices.push("No manager");
+        managerIds.push(null);
+
+          let managerQuestion = [
+            {
+              type: 'list',
+              message: 'Who is new manager of employee',
+              name: 'manager',
+              choices: managerChoices
+            }
+          ];
+          var new_role_id = 0;
+          inquirer
+            .prompt(managerQuestion)
+            .then((answer) => {
+
+              // Find manager_id from answer
+              var manager_id = null;
+              if (answer.manager != "No manager") {
+                for (i=0; i<managerChoices.length; i++) {
+                  if (answer.manager == managerChoices[i]) {
+                    manager_id = managerIds[i];
+                  }
+                }  
+              }
+
+              var sql = `UPDATE employee SET manager_id = ${manager_id} WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
+              connection.query(sql, function (err, result) {
+                if (err) throw err;
+                console.log(result.affectedRows + " record(s) updated");
+                setTimeout(function(){mainMenu(); }, 1000);
+              });
+            });   // end of .then
+        })   // end of .then
+      });
+    }
 
 const deleteEmployee = () => {
   var fullNames = [];
@@ -173,6 +252,7 @@ const deleteEmployee = () => {
   connection.query( query, (err, res) => {
     if (err) throw err;
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
+    console.log(res)
     res.forEach(function(item){
       fullNames.push(item.full_name)
     });
@@ -205,20 +285,48 @@ const deleteEmployee = () => {
 }   // End of DeleteEmployee
 
 // Displays formatted table of employees
-const viewAllEmployees = () => {
+const viewAllEmployees = (orderBy) => {
   let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id ';
   query += 'FROM employee ';
   query += 'JOIN role ON employee.role_id=role.role_id ';
   query += 'JOIN department ON role.department_id=department.department_id ';
-  query += 'ORDER by id'
+  if (orderBy == 0) {
+    query += 'ORDER by employee.id'
+  }
+  else if (orderBy == 1) {
+    query += 'ORDER by department.department_id, employee.id'
+  }
+  else {
+    query += 'ORDER by employee.manager_id, employee.id'
+  }
+
   connection.query( query, (err, res) => {
       if (err) throw err;
 
       var values = [];
-      res.forEach(({ id, first_name, last_name, title, name, salary, manager }) => {
-          let val = [id, first_name, last_name, title, name, salary, manager];
+      res.forEach(({ id, first_name, last_name, title, name, salary, manager_id }) => {
+          let val = [id, first_name, last_name, title, name, salary, manager_id];
           values.push(val);
       });
+
+      var i;
+      var j;
+      var manager_name;
+      var nameFound;
+      for (i=0; i<values.length; i++)
+      {
+        nameFound = false;
+        for (j=0; j<values.length; j++) {
+          if (values[i][6] == values[j][0]) {
+            values[i][6] = values[j][1] + ' ' + values[j][2];
+            nameFound = true;
+            break;
+          }
+        }
+        if (!nameFound) {
+          values[i][6] = " ";
+        }
+      }
       console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values);
       setTimeout(function(){mainMenu(); }, 1000);
   });
@@ -228,62 +336,94 @@ const viewAllEmployees = () => {
 // Has two inquirer prompts?
 // After last .then MainMenu is called (recursively!)
 const addEmployee = () => {
+
   var roleChoices = [];
+  var roleIds = [];
   connection.query('SELECT * FROM role', (err, res) => {
     if (err) throw err;
     res.forEach(function(item) {
-      roleChoices.push(item.title)
+      roleChoices.push(item.title);
+      roleIds.push(item.role_id);
     });
 
-    // Create an array of questions for user input during add employee
-    const addEmpQuestions = [
-      {
-          type: 'input',
-          message: 'What is first name?',
-          name: 'firstname',
-      },
-      {
-          type: 'input',
-          message: 'What is last name?',
-          name: 'lastname',
-      },
-      {
-          type: 'list',
-          message: 'What is role?',
-          name: 'role',
-          choices: roleChoices
-      }
-    ];
-  inquirer
-    .prompt(addEmpQuestions)
-    .then((answer) => {
-      var firstName = answer.firstname;
-      var lastName = answer.lastname;
-      var title = answer.role;
-      // Find role_id from title
-      var role_id = 0;
-      for (i=0; i<roleChoices.length; i++) {
-        if (title == roleChoices[i]) {
-          role_id = i+1;
-        }
-      }
-
-      // when finished prompting, insert a new item into employee table that info
-      connection.query('INSERT INTO employee SET ?',
+    var managerChoices = [];
+    var managerIds = [];
+    let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name, id FROM employee";
+    connection.query(query, (err, res) => {
+      if (err) throw err;
+      res.forEach(function(item) {
+        managerChoices.push(item.full_name)
+        managerIds.push(item.id)
+      });
+      managerChoices.push("No manager");
+      managerIds.push(null);
+  
+      // Create an array of questions for user input during add employee
+      const addEmpQuestions = [
         {
-          first_name: answer.firstname,
-          last_name: answer.lastname,
-          role_id: role_id,
-          manager_id: null
-        }, (err) => {
-        if (err) throw err;
-        console.log('Your employee was inserted into employee table successfully!');
-        setTimeout(function(){mainMenu(); }, 1000);
-        }
-      );  // end of query insert into employee
+          type: 'input',
+          message: "Employee's first name?",
+          name: 'firstname',
+        },
+        {
+          type: 'input',
+          message: "Employee's last name?",
+          name: 'lastname',
+        },
+        {
+          type: 'list',
+          message: "Employee's role?",
+          name: 'role',
+          choices: roleChoices,
+        },
+        {
+          type: 'list',
+          message: "Employee's manager?",
+          name: 'manager',
+          choices: managerChoices,
+        },
+      ];
+      inquirer
+        .prompt(addEmpQuestions)
+        .then((answer) => {
+          var firstName = answer.firstname;
+          var lastName = answer.lastname;
+          var roll = answer.role;
+          // Find role_id from title
+          var role_id = null;
+          var i;
+          for (i=0; i<roleChoices.length; i++) {
+            if (answer.role == roleChoices[i]) {
+              role_id = roleIds[i];
+            }
+          }
+          // Find manager_id from answer
+          var manager_id = null;
+          if (answer.manager != "No manager") {
+            for (i=0; i<managerChoices.length; i++) {
+              if (answer.manager == managerChoices[i]) {
+                manager_id = managerIds[i];
+              }
+            }  
+          }
 
-    });
-  });
+          // when finished prompting, insert a new item into employee table that info
+          connection.query('INSERT INTO employee SET ?',
+          {
+            first_name: answer.firstname,
+            last_name: answer.lastname,
+            role_id: role_id,
+            manager_id: manager_id
+          }, (err) => {
+            if (err) throw err;
+            console.log('Your employee was inserted into employee table successfully!');
+            setTimeout(function(){mainMenu(); }, 1000);
+            }
+          );  // end of query insert into employee
+
+      });
+    }); // End of query select from manager choices
+  }); // End of query select from roles
 }   // End of Add Employee
 
 const mainMenu = () => {
@@ -294,9 +434,12 @@ const mainMenu = () => {
       message: 'What would you like to do?',
       choices: [
         'View All Employees',
+        'View All Employees by Department',
+        'View All Employees by Manager',
         'Add Employee',
         'Delete Employee',
         'Change Role of Employee',
+        'Change Manager of Employee',
         'Add New Role',
         'Exit'
       ],
@@ -304,9 +447,17 @@ const mainMenu = () => {
     .then((answer) => {
       switch (answer.action) {
         case 'View All Employees':
-          viewAllEmployees();
+          viewAllEmployees(0);
           break;
 
+        case 'View All Employees by Department':
+          viewAllEmployees(1);
+          break;
+
+        case 'View All Employees by Manager':
+          viewAllEmployees(2);
+          break;
+    
         case 'Add Employee':
           addEmployee();
           break;
@@ -315,10 +466,14 @@ const mainMenu = () => {
           deleteEmployee();
           break;
 
-        case 'Change Role of Employee':
+        case 'UpdateEmployeeRole':
           changeRole();
           break;
 
+        case 'Update Employee Manager':
+          changeManager();
+          break;
+  
         case 'Add New Role':
           addNewRole();
           break;
