@@ -34,17 +34,123 @@ const readDepartment = () => {
   });
 };
 
+const addDepartment = () => {
+
+  const newDeptQuestion = [
+    {
+      type: 'input',
+      message: 'What is name of new department?',
+      name: 'new_dept',
+    },
+  ];
+
+  inquirer
+    .prompt(newDeptQuestion)
+    .then((answer) => {
+      connection.query('INSERT INTO department SET ?', { name: answer.new_dept }, (err) => {
+        if (err) throw err;
+        console.log('The new department was inserted into role table successfully!');
+        setTimeout(function(){mainMenu(); }, 1000);
+      });  // end of query insert into department
+  }); // end of .then((answer))
+} // End of addDepartment
+
+const removeDepartment = () => {
+  var deptNames = [];
+  connection.query( 'SELECT * FROM department', (err, res) => {
+    if (err) throw err;
+    // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
+
+    res.forEach(function(item) {
+      deptNames.push(item.name);
+    });
+    deptNames.push("Cancel");
+
+    const delDeptQuestions = [
+      {
+        type: 'list',
+        message: 'What is name of department to be removed?',
+        name: 'dept',
+        choices: deptNames
+      }
+    ];
+
+    inquirer
+      .prompt(delDeptQuestions)
+      .then((answer) => {
+        if (answer.dept == "Cancel") {
+          setTimeout(function(){mainMenu(); }, 1000);
+        }
+        let query = `DELETE FROM department WHERE ${answer.dept} = department.name`;
+        connection.query(query, function (err, res) {
+          if (err) throw err;
+          console.log(`The department ${answer.dept} was deleted from the department table successfully!`);
+          setTimeout(function(){mainMenu(); }, 1000);
+        });
+      });   // End of .then
+  });   // End of first connection.query
+} // End of removeDepartment
+
+const viewAllDepartments = () => {
+  connection.query('SELECT * FROM department', (err, res) => {
+    if (err) throw err;
+
+    var values = [];
+    res.forEach(({ id, name }) => {
+        let val = [id, name];
+        values.push(val);
+    });
+    console.table(['ID', 'Department' ], values);
+    setTimeout(function(){mainMenu(); }, 1000);
+  });
+} // End of viewAllDepartments
+
+const removeRole = () => {
+  var roleTitles = [];
+  connection.query( 'SELECT * FROM role', (err, res) => {
+    if (err) throw err;
+
+    res.forEach(function(item) {
+      roleTitles.push(item.title);
+    });
+    deptNames.push("Cancel");
+
+    const delRoleQuestions = [
+      {
+        type: 'list',
+        message: 'What is name of role to be removed?',
+        name: 'role',
+        choices: roleTitles
+      }
+    ];
+
+    inquirer
+      .prompt(delRoleQuestions)
+      .then((answer) => {
+        if (answer.role == "Cancel") {
+          setTimeout(function(){mainMenu(); }, 1000);
+        }
+        let query = `DELETE FROM role WHERE ${answer.role} = role.title`;
+        connection.query(query, function (err, res) {
+          if (err) throw err;
+          console.log(`The role ${answer.role} was deleted from the role table successfully!`);
+          setTimeout(function(){mainMenu(); }, 1000);
+        });
+      });   // End of .then
+  });   // End of first connection.query
+} // End of removeRoll
+
 const addNewRole = () => {
   // 1. What is name of new role
   const newRoleQuestion = [
     {
       type: 'input',
-      message: 'What is name new role?',
+      message: 'What is name of new role?',
       name: 'new_role',
     },
     {
       type: 'number',
-      message: 'What is salary',
+      message: 'What is salary?',
       name: 'new_salary'
     }
   ];
@@ -53,11 +159,15 @@ const addNewRole = () => {
     .then((answer) => {
       var newRole = answer.new_role;
       var newSalary = answer.new_salary
-      var deptChoices = [];
+
       connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
-        res.forEach(function(item){
-          deptChoices.push(item.name)
+
+        var deptChoices = [];
+        var deptIds = [];
+        res.forEach(function(item) {
+          deptIds.push(item.department_id);
+          deptChoices.push(item.name);
         });    
 
         const whatDeptQuestions = [
@@ -75,7 +185,7 @@ const addNewRole = () => {
             var i;
             for (i=0; i<deptChoices.length; i++) {
               if (answer.department == deptChoices[i]) {
-                dept_id = i+1;
+                dept_id = deptIds[i];
               }
             }
             connection.query('INSERT INTO role SET ?',
@@ -93,10 +203,8 @@ const addNewRole = () => {
           });
         //connection.end();
       });
-
-
     });
-}
+} // End of addNewRole()
 
 
 // To change role of employee
@@ -260,7 +368,7 @@ const deleteEmployee = () => {
     const delEmplQuestions = [
       {
         type: 'list',
-        message: 'What is name of employee to be deleted?',
+        message: 'What is name of employee to be removed?',
         name: 'employee',
         choices: fullNames
       }];
@@ -324,7 +432,7 @@ const viewAllEmployees = (orderBy) => {
           }
         }
         if (!nameFound) {
-          values[i][6] = " ";
+          values[i][6] = "---";
         }
       }
       console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values);
@@ -437,11 +545,15 @@ const mainMenu = () => {
         'View All Employees by Department',
         'View All Employees by Manager',
         'Add Employee',
-        'Delete Employee',
+        'Remove Employee',
         'Change Role of Employee',
         'Change Manager of Employee',
         'Add New Role',
-        'Exit'
+        'Remove Role',
+        'View All Departments',
+        'Add Department',
+        'Remove Department',
+        'Exit',
       ],
     })
     .then((answer) => {
@@ -466,7 +578,7 @@ const mainMenu = () => {
           deleteEmployee();
           break;
 
-        case 'UpdateEmployeeRole':
+        case 'Update Employee Role':
           changeRole();
           break;
 
@@ -477,7 +589,27 @@ const mainMenu = () => {
         case 'Add New Role':
           addNewRole();
           break;
-    
+  
+          // ToDo
+        case 'Remove Role':
+          removeRole();
+          break;
+  
+        // ToDo
+        case 'View All Departments':
+          viewAllDepartments();
+          break;
+  
+        // ToDo
+        case 'Add Department':
+          addDepartment();
+          break;
+  
+        // ToDo
+        case 'Remove Department':
+          removeDepartment();
+          break;
+          
         case 'Exit':
           connection.end();
           break;
