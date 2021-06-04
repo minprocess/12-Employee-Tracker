@@ -40,6 +40,41 @@ Then start the app with node app
 You will be presented with the following choices
 ![Main menu of Employee Tracker](./assets/Main_menu_of_Employee-Tracker.png)
 
+
+    'View All Employees',
+    'View All Employees by Department',
+    'View All Employees by Manager',
+    'Add Employee',
+        "Employee's first name?",
+        "Employee's last name?",
+        "Choose employee's role from list",
+        "Choose employee's manager from list",
+    'Remove Employee',
+        Chose employee from list
+    'Change Role of Employee',
+        'Choose employee with new role from list',
+        'Chose new role of employee from list'
+    'Change Manager of Employee',
+        Choose name of employee with new manager?
+            List of employees
+        Choose new manager
+            List of employees
+            No manager
+    'Add New Role',
+    'Remove Role',
+        'Choose role to be removed'
+            List of roles
+            Cancel
+    'View All Departments',
+    'Add Department',
+        'What is name of new department?'
+    'Remove Department',
+        'Choose department to be removed'
+            List of departments
+            Cancel
+    'Exit',
+
+
 ## MIT License
 
 Copyright (c) 2021 William Pate

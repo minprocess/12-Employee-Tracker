@@ -1,6 +1,6 @@
 // addnewRole()
 // changeRole() of employee
-// deleteEmployee()
+// removeEmployee()
 // viewAllEmployees()
 // addEmployee()
 
@@ -69,8 +69,9 @@ const removeDepartment = () => {
     const delDeptQuestions = [
       {
         type: 'list',
-        message: 'What is name of department to be removed?',
+        message: 'Choose department to be removed',
         name: 'dept',
+        pageSize: 15,
         choices: deptNames
       }
     ];
@@ -118,8 +119,9 @@ const removeRole = () => {
     const delRoleQuestions = [
       {
         type: 'list',
-        message: 'What is name of role to be removed?',
+        message: 'Choose role to be removed',
         name: 'role',
+        pageSize: 15,
         choices: roleTitles
       }
     ];
@@ -168,18 +170,24 @@ const addNewRole = () => {
         res.forEach(function(item) {
           deptIds.push(item.department_id);
           deptChoices.push(item.name);
-        });    
+        });
+        deptChoices.push("Cancel");
 
         const whatDeptQuestions = [
           {
             type: 'list',
-            message: 'What department is the new role in?',
+            message: 'Choose department that the new role is in',
             name: 'department',
+            pageSize: 15,
             choices: deptChoices
         }];
         inquirer
           .prompt(whatDeptQuestions)
           .then((answer) => {
+
+            if (answer.department == "Cancel") {
+              setTimeout(function() { mainMenu(); }, 1000);
+            }
             // when finished prompting, insert a new item into role table with that info
             var dept_id = 0;
             var i;
@@ -189,19 +197,16 @@ const addNewRole = () => {
               }
             }
             connection.query('INSERT INTO role SET ?',
-              {
-                title: newRole,
-                salary: newSalary,
-                department_id: dept_id
-              }, (err) => {
-                if (err) throw err;
-                console.log('The new role was inserted into role table successfully!');
-                setTimeout(function(){mainMenu(); }, 1000);
-              }
-            );  // end of query insert into employee
-
-          });
-        //connection.end();
+                {
+                  title: newRole,
+                  salary: newSalary,
+                  department_id: dept_id
+                }, (err) => {
+              if (err) throw err;
+              console.log('The new role was inserted into role table successfully!');
+              setTimeout(function() { mainMenu(); }, 1000);
+            });  // end of query insert into employee
+          }); // End of .then
       });
     });
 } // End of addNewRole()
@@ -229,19 +234,20 @@ const changeRole = () => {
     const employeeNameQuestions = [
       {
         type: 'list',
-        message: 'What is name of employee with new role?',
+        message: 'Choose name of employee with new role',
         name: 'employee',
+        pageSize: 15,
         choices: fullNames
       }];
-    var firstName;
-    var lastName;
+
     inquirer
       .prompt(employeeNameQuestions)
       .then((answer) => {
-        let str = answer.employee;
-        let substrings = str.split(' ');
-        firstName = substrings[0];
-        lastName = substrings[1];
+
+        if (answer.employee == "Cancel") {
+          setTimeout(function() { mainMenu(); }, 1000);
+        }
+
         var titles = [];
         var roleIds = [];
         connection.query( 'SELECT role_id, title FROM role ', (err, res) => {
@@ -249,12 +255,14 @@ const changeRole = () => {
             roleIds.push(item.role_id)
             titles.push(item.title);
           });
+          title.push("Cancel");
 
           let roleQuestions = [
             {
               type: 'list',
-              message: 'What is new role of employee',
+              message: 'Choose new role of employee',
               name: 'new_role',
+              pageSize: 15,
               choices: titles
             }
           ];
@@ -262,16 +270,22 @@ const changeRole = () => {
           inquirer
             .prompt(roleQuestions)
             .then((answer) => {
+              if (answer.new_role == "Cancel") {
+                setTimeout(function() { mainMenu(); }, 1000);
+              }
+
               for (i=0; i<titles.length; i++) {
                 if (answer.new_role == titles[i]) {
                   new_role_id = roleIds[i];
                 }
               }   // end of for loop
-              var sql = `UPDATE employee SET role_id = ${new_role_id} WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
+              let str = answer.employee;
+              let substrings = str.split(' ');
+              var sql = `UPDATE employee SET role_id = ${new_role_id} WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
               connection.query(sql, function (err, result) {
                 if (err) throw err;
                 console.log(result.affectedRows + " record(s) updated");
-                setTimeout(function(){mainMenu(); }, 1000);
+                setTimeout(function() { mainMenu(); }, 1000);
               });
             });   // end of .then
         })
@@ -297,100 +311,115 @@ const changeManager = () => {
       fullNames.push(item.full_name);
       employeeIds.push(item.id);
     });
+    let fullNames2 = fullNames;
+    fullNames2.push("Cancel");
     const employeeNameQuestions = [
       {
         type: 'list',
-        message: 'What is name of employee with new manager?',
+        message: 'Choose name of employee with new manager?',
         name: 'employee',
-        choices: fullNames
-      }];
-    var firstName;
-    var lastName;
+        pageSize: 15,
+        choices: fullNames2
+      }
+    ];
+
     inquirer
       .prompt(employeeNameQuestions)
       .then((answer) => {
-        let str = answer.employee;
-        let substrings = str.split(' ');
-        firstName = substrings[0];
-        lastName = substrings[1];
+
+        if (answer.manager == "Cancel") {
+          setTimeout(function() { mainMenu(); }, 1000);
+        }
 
         let managerChoices = fullNames;
         let managerIds = employeeIds;
         managerChoices.push("No manager");
         managerIds.push(null);
+        managerChoices.push("Cancel");
 
-          let managerQuestion = [
-            {
-              type: 'list',
-              message: 'Who is new manager of employee',
-              name: 'manager',
-              choices: managerChoices
+        let managerQuestion = [
+          {
+            type: 'list',
+            message: 'Choose new manager',
+            name: 'manager',
+            pageSize: 15,
+            choices: managerChoices
+          }
+        ];
+        var new_role_id = 0;
+        inquirer
+          .prompt(managerQuestion)
+          .then((answer) => {
+
+            if (answer.manager == "Cancel") {
+              setTimeout(function() { mainMenu(); }, 1000);
             }
-          ];
-          var new_role_id = 0;
-          inquirer
-            .prompt(managerQuestion)
-            .then((answer) => {
 
-              // Find manager_id from answer
-              var manager_id = null;
-              if (answer.manager != "No manager") {
-                for (i=0; i<managerChoices.length; i++) {
-                  if (answer.manager == managerChoices[i]) {
-                    manager_id = managerIds[i];
-                  }
-                }  
-              }
+            // Find manager_id from answer
+            var manager_id = null;
+            if (answer.manager != "No manager") {
+              for (i=0; i<managerChoices.length; i++) {
+                if (answer.manager == managerChoices[i]) {
+                  manager_id = managerIds[i];
+                }
+              }  
+            }
+            else {
+              setTimeout(function(){mainMenu(); }, 1000);
+            }
 
-              var sql = `UPDATE employee SET manager_id = ${manager_id} WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
-              connection.query(sql, function (err, result) {
-                if (err) throw err;
-                console.log(result.affectedRows + " record(s) updated");
-                setTimeout(function(){mainMenu(); }, 1000);
-              });
-            });   // end of .then
-        })   // end of .then
-      });
-    }
+            let str = answer.employee;
+            let substrings = str.split(' ');
+            let sql = `UPDATE employee SET manager_id = ${manager_id} WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
+            connection.query(sql, function (err, result) {
+              if (err) throw err;
+              console.log(result.affectedRows + " record(s) updated");
+              setTimeout(function() { mainMenu(); }, 1000);
+            });
+          });   // end of .then
+      })   // end of .then
+  });
+}
 
-const deleteEmployee = () => {
+const removeEmployee = () => {
   var fullNames = [];
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
   let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name FROM employee";
   connection.query( query, (err, res) => {
     if (err) throw err;
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
-    console.log(res)
-    res.forEach(function(item){
+
+    res.forEach(function(item) {
       fullNames.push(item.full_name)
     });
+    fullNames.push("Cancel");
 
     const delEmplQuestions = [
       {
         type: 'list',
-        message: 'What is name of employee to be removed?',
+        message: 'Choose employee to be removed',
         name: 'employee',
+        pageSize: 15,
         choices: fullNames
-      }];
+      }
+    ];
 
-    var firstName;
-    var lastName;
     inquirer
       .prompt(delEmplQuestions)
       .then((answer) => {
+        if (answer.employee == "Cancel") {
+          setTimeout(function(){mainMenu(); }, 1000);
+        }
         let str = answer.employee;
         let substrings = str.split(' ');
-        firstName = substrings[0];
-        lastName = substrings[1];
-        let query2 = `DELETE FROM employee WHERE first_name = "${firstName}" AND last_name = "${lastName}"`;
-        connection.query(query2, function (err2, result2) {
+        let sql = `DELETE FROM employee WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
+        connection.query(sql, function (err2, result2) {
           if (err2) throw err2;
-
-          setTimeout(function(){mainMenu(); }, 1000);
+          setTimeout(function() { mainMenu(); }, 1000);
         });
       });   // End of .then
   });   // End of first connection.query
-}   // End of DeleteEmployee
+}   // End of removeEmployee
 
 // Displays formatted table of employees
 const viewAllEmployees = (orderBy) => {
@@ -417,16 +446,15 @@ const viewAllEmployees = (orderBy) => {
           values.push(val);
       });
 
-      var i;
-      var j;
-      var manager_name;
+      var i, j;
       var nameFound;
+      // Find manager name from manager_id
       for (i=0; i<values.length; i++)
       {
         nameFound = false;
         for (j=0; j<values.length; j++) {
-          if (values[i][6] == values[j][0]) {
-            values[i][6] = values[j][1] + ' ' + values[j][2];
+          if (values[i][6] == values[j][0]) { // [6] is manager_id, [0] is employee_id
+            values[i][6] = values[j][1] + ' ' + values[j][2]; // replace the id in [6] by a name
             nameFound = true;
             break;
           }
@@ -453,6 +481,7 @@ const addEmployee = () => {
       roleChoices.push(item.title);
       roleIds.push(item.role_id);
     });
+    roleChoices.push("Cancel");
 
     var managerChoices = [];
     var managerIds = [];
@@ -465,6 +494,7 @@ const addEmployee = () => {
       });
       managerChoices.push("No manager");
       managerIds.push(null);
+      managerChoices.push("Cancel");
   
       // Create an array of questions for user input during add employee
       const addEmpQuestions = [
@@ -480,23 +510,27 @@ const addEmployee = () => {
         },
         {
           type: 'list',
-          message: "Employee's role?",
+          message: "Choose employee's role",
           name: 'role',
+          pageSize: 15,
           choices: roleChoices,
         },
         {
           type: 'list',
-          message: "Employee's manager?",
+          message: "Choose employee's manager",
           name: 'manager',
+          pageSize: 15,
           choices: managerChoices,
         },
       ];
       inquirer
         .prompt(addEmpQuestions)
         .then((answer) => {
-          var firstName = answer.firstname;
-          var lastName = answer.lastname;
-          var roll = answer.role;
+
+          if (answer.role = "Cancel") {
+            setTimeout(function() { mainMenu(); }, 1000);
+          }
+
           // Find role_id from title
           var role_id = null;
           var i;
@@ -505,6 +539,11 @@ const addEmployee = () => {
               role_id = roleIds[i];
             }
           }
+
+          if (answer.manager = "Cancel") {
+            setTimeout(function() { mainMenu(); }, 1000);
+          }
+
           // Find manager_id from answer
           var manager_id = null;
           if (answer.manager != "No manager") {
@@ -517,19 +556,18 @@ const addEmployee = () => {
 
           // when finished prompting, insert a new item into employee table that info
           connection.query('INSERT INTO employee SET ?',
-          {
-            first_name: answer.firstname,
-            last_name: answer.lastname,
-            role_id: role_id,
-            manager_id: manager_id
-          }, (err) => {
+              {
+                first_name: answer.firstname,
+                last_name: answer.lastname,
+                role_id: role_id,
+                manager_id: manager_id
+              }, (err) => {
             if (err) throw err;
             console.log('Your employee was inserted into employee table successfully!');
-            setTimeout(function(){mainMenu(); }, 1000);
-            }
-          );  // end of query insert into employee
+            setTimeout(function() { mainMenu(); }, 1000);
+          });  // end of query insert into employee
 
-      });
+        }); // End of .then
     }); // End of query select from manager choices
   }); // End of query select from roles
 }   // End of Add Employee
@@ -540,6 +578,7 @@ const mainMenu = () => {
       name: 'action',
       type: 'list',
       message: 'What would you like to do?',
+      pageSize: 13,
       choices: [
         'View All Employees',
         'View All Employees by Department',
@@ -575,7 +614,7 @@ const mainMenu = () => {
           break;
 
         case 'Delete Employee':
-          deleteEmployee();
+          removeEmployee();
           break;
 
         case 'Update Employee Role':
