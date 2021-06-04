@@ -35,8 +35,8 @@ Here is the link to the GitHub repo. The GitHub repo will have a mp4 recording o
 
 The MP4 recording is in the assets folder.
 ## Usage
-First copy the contents of sql into Workbench then create the employee, role and department tables
-Then start the app with node app
+First copy the contents of schema.sql into an empty query tab in Workbench and create the employee, role and department tables.
+Start the app with the command `node app`.
 You will be presented with the following choices
 ![Main menu of Employee Tracker](./assets/Main_menu_of_Employee-Tracker.png)
 
@@ -69,6 +69,8 @@ The list below shows the menu of actions that can be taken and for each action w
     Remove Department
         Choose department to be removed from list
     Exit
+
+Caution! If Remove Department command is chosen then the employees in that department will be deleted from the table! Similarly removing a role will delete employees having that role from the database.
 
 ## Testing and Refactoring
 Testing is needed for the following circumstances

@@ -187,7 +187,7 @@ const removeRole = () => {
     res.forEach(function(item) {
       roleTitles.push(item.title);
     });
-    deptNames.push("Cancel");
+    roleTitles.push("Cancel");
 
     const delRoleQuestions = [
       {
@@ -206,7 +206,7 @@ const removeRole = () => {
           setTimeout(function() { mainMenu(); }, 1000);
           return;
         }
-        let query = `DELETE FROM role WHERE ${answer.role} = role.title`;
+        let query = `DELETE FROM role WHERE "${answer.role}" = role.title`;
         connection.query(query, function (err, res) {
           if (err) throw err;
           console.log(`The role ${answer.role} was deleted from the role table successfully!`);
