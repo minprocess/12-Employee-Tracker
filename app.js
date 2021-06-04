@@ -46,6 +46,7 @@ const addDepartment = () => {
         if (err) throw err;
         console.log(`The new department ${answer.new_dept} was inserted into department table successfully!`);
         setTimeout(function(){mainMenu(); }, 1000);
+        return;
       });  // end of query insert into department
   }); // end of .then((answer))
 } // End of addDepartment
@@ -76,12 +77,14 @@ const removeDepartment = () => {
       .then((answer) => {
         if (answer.dept == "Cancel") {
           setTimeout(function(){mainMenu(); }, 1000);
+          return;
         }
         let query = `DELETE FROM department WHERE ${answer.dept} = department.name`;
         connection.query(query, function (err, res) {
           if (err) throw err;
           console.log(`The department ${answer.dept} was deleted from the department table successfully!`);
           setTimeout(function(){mainMenu(); }, 1000);
+          return;
         });
       });   // End of .then
   });   // End of first connection.query
@@ -98,6 +101,7 @@ const viewAllDepartments = () => {
     });
     console.table(['ID', 'Department' ], values);
     setTimeout(function(){mainMenu(); }, 1000);
+    return;
   });
 } // End of viewAllDepartments
 
@@ -126,12 +130,14 @@ const removeRole = () => {
       .then((answer) => {
         if (answer.role == "Cancel") {
           setTimeout(function(){mainMenu(); }, 1000);
+          return;
         }
         let query = `DELETE FROM role WHERE ${answer.role} = role.title`;
         connection.query(query, function (err, res) {
           if (err) throw err;
           console.log(`The role ${answer.role} was deleted from the role table successfully!`);
           setTimeout(function(){mainMenu(); }, 1000);
+          return;
         });
       });   // End of .then
   });   // End of first connection.query
@@ -178,17 +184,19 @@ const addNewRole = () => {
         }];
         inquirer
           .prompt(whatDeptQuestions)
-          .then((answer) => {
+          .then((answer2) => {
 
-            if (answer.department == "Cancel") {
+            if (answer2.department == "Cancel") {
               setTimeout(function() { mainMenu(); }, 1000);
+              return;
             }
             // when finished prompting, insert a new item into role table with that info
             var dept_id = 0;
             var i;
             for (i=0; i<deptChoices.length; i++) {
-              if (answer.department == deptChoices[i]) {
+              if (answer2.department == deptChoices[i]) {
                 dept_id = deptIds[i];
+                break;
               }
             }
             connection.query('INSERT INTO role SET ?',
@@ -198,8 +206,9 @@ const addNewRole = () => {
                   department_id: dept_id
                 }, (err) => {
               if (err) throw err;
-              console.log(`The new role ${newRole} was inserted into role table successfully!`);
+              console.log(`The new role ${newRole} was inserted into the role table successfully!`);
               setTimeout(function() { mainMenu(); }, 1000);
+              return;
             });  // end of query insert into employee
           }); // End of .then
       });
@@ -213,7 +222,7 @@ const addNewRole = () => {
 // 3. Change role_id in employee table
 // After last .then MainMenu is called (recursively!)
 
-const changeRole = () => {
+const updateRole = () => {
   // STEP 1. Select employee
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
   let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name, id FROM employee";
@@ -221,10 +230,8 @@ const changeRole = () => {
     if (err) throw err;
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
     var fullNames = [];
-    var employeeIds = [];
     res.forEach(function(item) {
       fullNames.push(item.full_name);
-      employeeIds.push(item.id);
     });
     fullNames.push("Cancel");
     const employeeNameQuestions = [
@@ -242,7 +249,9 @@ const changeRole = () => {
 
         if (answer.employee == "Cancel") {
           setTimeout(function() { mainMenu(); }, 1000);
+          return;
         }
+        let theEmployee = answer.employee;
 
         var titles = [];
         var roleIds = [];
@@ -262,26 +271,30 @@ const changeRole = () => {
               choices: titles
             }
           ];
-          var new_role_id = 0;
+
           inquirer
             .prompt(roleQuestions)
-            .then((answer) => {
-              if (answer.new_role == "Cancel") {
+            .then((answer2) => {
+              if (answer2.new_role == "Cancel") {
                 setTimeout(function() { mainMenu(); }, 1000);
+                return;
               }
 
+              let newRole = answer2.new_role;
+              let new_role_id = 0;
               for (i=0; i<titles.length; i++) {
-                if (answer.new_role == titles[i]) {
+                if (answer2.new_role == titles[i]) {
                   new_role_id = roleIds[i];
+                  break;
                 }
               }   // end of for loop
-              let str = answer.employee;
-              let substrings = str.split(' ');
+              let substrings = theEmployee.split(' ');
               var sql = `UPDATE employee SET role_id = ${new_role_id} WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
               connection.query(sql, function (err, result) {
                 if (err) throw err;
-                console.log(`The new role ${newRole} of ${answer.employee} in employee table was performed successfully!`);
+                console.log(`The new role ${newRole} of ${theEmployee} in employee table was performed successfully!`);
                 setTimeout(function() { mainMenu(); }, 1000);
+                return;
               });
             });   // end of .then
         })
@@ -294,7 +307,7 @@ const changeRole = () => {
 // 2. Ask user who is new manager of employee.
 // 3. Change manager in employee table
 // After last .then MainMenu is called (recursively!)
-const changeManager = () => {
+const updateManager = () => {
   // STEP 1. Select employee
   var fullNames = [];
   var employeeIds = [];
@@ -325,7 +338,9 @@ const changeManager = () => {
 
         if (answer.employee == "Cancel") {
           setTimeout(function() { mainMenu(); }, 1000);
+          return;
         }
+        let theEmployee = answer.employee;
 
         let managerChoices = fullNames;
         let managerIds = employeeIds;
@@ -345,32 +360,35 @@ const changeManager = () => {
         var new_role_id = 0;
         inquirer
           .prompt(managerQuestion)
-          .then((answer) => {
+          .then((answer2) => {
 
-            if (answer.manager == "Cancel") {
+            if (answer2.manager == "Cancel") {
               setTimeout(function() { mainMenu(); }, 1000);
+              return;
             }
 
             // Find manager_id from answer
             var manager_id = null;
-            if (answer.manager != "No manager") {
+            if (answer2.manager != "No manager") {
               for (i=0; i<managerChoices.length; i++) {
-                if (answer.manager == managerChoices[i]) {
+                if (answer2.manager == managerChoices[i]) {
                   manager_id = managerIds[i];
+                  break;
                 }
               }  
             }
             else {
-              setTimeout(function(){mainMenu(); }, 1000);
+              setTimeout(function() { mainMenu(); }, 1000);
+              return;
             }
 
-            let str = answer.employee;
-            let substrings = str.split(' ');
+            let substrings = theEmployee.split(' ');
             let sql = `UPDATE employee SET manager_id = ${manager_id} WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
             connection.query(sql, function (err, result) {
               if (err) throw err;
-              console.log(`The new manager ${answer.manager} of ${answer.employee} in employee table was performed successfully!`);
+              console.log(`The new manager ${answer2.manager} of ${theEmployee} in employee table was performed successfully!`);
               setTimeout(function() { mainMenu(); }, 1000);
+              return;
             });
           });   // end of .then
       })   // end of .then
@@ -404,7 +422,8 @@ const removeEmployee = () => {
       .prompt(delEmplQuestions)
       .then((answer) => {
         if (answer.employee == "Cancel") {
-          setTimeout(function(){mainMenu(); }, 1000);
+          setTimeout(function() { mainMenu(); }, 1000);
+          return;
         }
         let str = answer.employee;
         let substrings = str.split(' ');
@@ -413,6 +432,7 @@ const removeEmployee = () => {
           if (err2) throw err2;
           console.log(`The employee ${answer.employee} was removed from employee table successfully!`);
           setTimeout(function() { mainMenu(); }, 1000);
+          return;
         });
       });   // End of .then
   });   // End of first connection.query
@@ -462,6 +482,7 @@ const viewAllEmployees = (orderBy) => {
       }
       console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values);
       setTimeout(function(){mainMenu(); }, 1000);
+      return;
   });
 }
 
@@ -526,6 +547,7 @@ const addEmployee = () => {
 
           if (answer.role == "Cancel") {
             setTimeout(function() { mainMenu(); }, 1000);
+            return;
           }
 
           // Find role_id from title
@@ -540,6 +562,7 @@ const addEmployee = () => {
 
           if (answer.manager == "Cancel") {
             setTimeout(function() { mainMenu(); }, 1000);
+            return;
           }
 
           // Find manager_id from answer
@@ -548,6 +571,7 @@ const addEmployee = () => {
             for (i=0; i<managerChoices.length; i++) {
               if (answer.manager == managerChoices[i]) {
                 manager_id = managerIds[i];
+                break;
               }
             }  
           }
@@ -563,6 +587,7 @@ const addEmployee = () => {
             if (err) throw err;
             console.log('Your employee was inserted into employee table successfully!');
             setTimeout(function() { mainMenu(); }, 1000);
+            return;
           });  // end of query insert into employee
 
         }); // End of .then
@@ -616,11 +641,11 @@ const mainMenu = () => {
           break;
 
         case 'Update Employee Role':
-          changeRole();
+          updateRole();
           break;
 
         case 'Update Employee Manager':
-          changeManager();
+          updateManager();
           break;
   
         case 'Add New Role':

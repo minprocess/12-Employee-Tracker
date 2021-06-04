@@ -75,6 +75,7 @@ Testing is needed for the following circumstances
 1. The first name or last name contain a space such as Jean-Claude van Damme
 2. There is an extra space in first name or last name
 3. There should be a confirmation before removing an employee, department or role.
+4. Two employees with same name
 
 ## MIT License
 
