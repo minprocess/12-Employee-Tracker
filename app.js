@@ -105,20 +105,9 @@ const viewAllDepartments = () => {
   });
 } // End of viewAllDepartments
 
-
-/*
-CREATE TABLE role (
-    role_id INT NOT NULL AUTO_INCREMENT,
-    title VARCHAR(30) NOT NULL,
-    salary VARCHAR(30) NOT NULL,
-    department_id INT NOT NULL,
-    FOREIGN KEY (department_id) REFERENCES department(department_id) ON DELETE CASCADE,
-    PRIMARY KEY (role_id)
-);
-*/
-
 const viewAllRoles = () => {
-  let query = 'SELECT role.role_id, role.title, role.salary, department.name FROM role JOIN department ON role.department_id=department.department_id'
+  let query = 'SELECT role.role_id, role.title, role.salary, department.name FROM role JOIN department ON role.department_id=department.department_id ';
+  query += 'ORDER by role.role_id';
   connection.query(query, (err, res) => {
     if (err) throw err;
 
@@ -469,6 +458,7 @@ const removeEmployee = () => {
 }   // End of removeEmployee
 
 // Displays formatted table of employees
+// orderBy is an integer, 0=order by employee.id, 1=by department.department_id and 2=by employee.manager_id
 const viewAllEmployees = (orderBy) => {
   let query = 'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name, role.salary, employee.manager_id ';
   query += 'FROM employee ';
