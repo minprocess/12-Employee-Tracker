@@ -1,8 +1,3 @@
-// addnewRole()
-// changeRole() of employee
-// removeEmployee()
-// viewAllEmployees()
-// addEmployee()
 
 
 const mysql = require('mysql');
@@ -49,7 +44,7 @@ const addDepartment = () => {
     .then((answer) => {
       connection.query('INSERT INTO department SET ?', { name: answer.new_dept }, (err) => {
         if (err) throw err;
-        console.log('The new department was inserted into role table successfully!');
+        console.log(`The new department ${answer.new_dept} was inserted into department table successfully!`);
         setTimeout(function(){mainMenu(); }, 1000);
       });  // end of query insert into department
   }); // end of .then((answer))
@@ -203,7 +198,7 @@ const addNewRole = () => {
                   department_id: dept_id
                 }, (err) => {
               if (err) throw err;
-              console.log('The new role was inserted into role table successfully!');
+              console.log(`The new role ${newRole} was inserted into role table successfully!`);
               setTimeout(function() { mainMenu(); }, 1000);
             });  // end of query insert into employee
           }); // End of .then
@@ -220,17 +215,18 @@ const addNewRole = () => {
 
 const changeRole = () => {
   // STEP 1. Select employee
-  var fullNames = [];
-  var employeeIds = [];
   //let query = 'SELECT employee.first_name, employee.last_name FROM employee ';
   let query = "SELECT CONCAT(first_name, ' ', last_name) AS full_name, id FROM employee";
   connection.query( query, async function (err, res) {
     if (err) throw err;
     // https://stackoverflow.com/questions/31221980/how-to-access-a-rowdatapacket-object
-    await res.forEach(function(item) {
+    var fullNames = [];
+    var employeeIds = [];
+    res.forEach(function(item) {
       fullNames.push(item.full_name);
       employeeIds.push(item.id);
     });
+    fullNames.push("Cancel");
     const employeeNameQuestions = [
       {
         type: 'list',
@@ -255,7 +251,7 @@ const changeRole = () => {
             roleIds.push(item.role_id)
             titles.push(item.title);
           });
-          title.push("Cancel");
+          titles.push("Cancel");
 
           let roleQuestions = [
             {
@@ -284,7 +280,7 @@ const changeRole = () => {
               var sql = `UPDATE employee SET role_id = ${new_role_id} WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
               connection.query(sql, function (err, result) {
                 if (err) throw err;
-                console.log(result.affectedRows + " record(s) updated");
+                console.log(`The new role ${newRole} of ${answer.employee} in employee table was performed successfully!`);
                 setTimeout(function() { mainMenu(); }, 1000);
               });
             });   // end of .then
@@ -327,7 +323,7 @@ const changeManager = () => {
       .prompt(employeeNameQuestions)
       .then((answer) => {
 
-        if (answer.manager == "Cancel") {
+        if (answer.employee == "Cancel") {
           setTimeout(function() { mainMenu(); }, 1000);
         }
 
@@ -373,7 +369,7 @@ const changeManager = () => {
             let sql = `UPDATE employee SET manager_id = ${manager_id} WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
             connection.query(sql, function (err, result) {
               if (err) throw err;
-              console.log(result.affectedRows + " record(s) updated");
+              console.log(`The new manager ${answer.manager} of ${answer.employee} in employee table was performed successfully!`);
               setTimeout(function() { mainMenu(); }, 1000);
             });
           });   // end of .then
@@ -415,6 +411,7 @@ const removeEmployee = () => {
         let sql = `DELETE FROM employee WHERE first_name = "${substrings[0]}" AND last_name = "${substrings[1]}"`;
         connection.query(sql, function (err2, result2) {
           if (err2) throw err2;
+          console.log(`The employee ${answer.employee} was removed from employee table successfully!`);
           setTimeout(function() { mainMenu(); }, 1000);
         });
       });   // End of .then
@@ -527,7 +524,7 @@ const addEmployee = () => {
         .prompt(addEmpQuestions)
         .then((answer) => {
 
-          if (answer.role = "Cancel") {
+          if (answer.role == "Cancel") {
             setTimeout(function() { mainMenu(); }, 1000);
           }
 
@@ -537,10 +534,11 @@ const addEmployee = () => {
           for (i=0; i<roleChoices.length; i++) {
             if (answer.role == roleChoices[i]) {
               role_id = roleIds[i];
+              break;
             }
           }
 
-          if (answer.manager = "Cancel") {
+          if (answer.manager == "Cancel") {
             setTimeout(function() { mainMenu(); }, 1000);
           }
 
@@ -585,8 +583,8 @@ const mainMenu = () => {
         'View All Employees by Manager',
         'Add Employee',
         'Remove Employee',
-        'Change Role of Employee',
-        'Change Manager of Employee',
+        'Update Employee Role',
+        'Update Employee Manager',
         'Add New Role',
         'Remove Role',
         'View All Departments',
@@ -613,7 +611,7 @@ const mainMenu = () => {
           addEmployee();
           break;
 
-        case 'Delete Employee':
+        case 'Remove Employee':
           removeEmployee();
           break;
 

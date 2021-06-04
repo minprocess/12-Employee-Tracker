@@ -40,40 +40,41 @@ Then start the app with node app
 You will be presented with the following choices
 ![Main menu of Employee Tracker](./assets/Main_menu_of_Employee-Tracker.png)
 
-
-    'View All Employees',
-    'View All Employees by Department',
-    'View All Employees by Manager',
-    'Add Employee',
-        "Employee's first name?",
-        "Employee's last name?",
-        "Choose employee's role from list",
-        "Choose employee's manager from list",
-    'Remove Employee',
+The list below shows the menu of actions that can be taken and for each action what questions or list the user may see.
+    View All Employees
+    View All Employees by Department
+    View All Employees by Manager
+    Add Employee
+        Employee's first name?
+        Employee's last name?
+        Choose employee's role from list
+        Choose employee's manager from list
+    Remove Employee
         Chose employee from list
-    'Change Role of Employee',
-        'Choose employee with new role from list',
-        'Chose new role of employee from list'
-    'Change Manager of Employee',
-        Choose name of employee with new manager?
-            List of employees
-        Choose new manager
-            List of employees
-            No manager
-    'Add New Role',
-    'Remove Role',
-        'Choose role to be removed'
-            List of roles
-            Cancel
-    'View All Departments',
-    'Add Department',
-        'What is name of new department?'
-    'Remove Department',
-        'Choose department to be removed'
-            List of departments
-            Cancel
-    'Exit',
+    Change Role of Employee
+        Choose employee with new role from list
+        Chose new role of employee from list
+    Change Manager of Employee
+        Choose employee with new manager from list
+        Choose new manager from list
+    Add New Role
+        What is name of new role?
+        What is salary?
+        Choose department from list
+    Remove Role
+        Choose role to be removed from list
+    View All Departments
+    Add Department
+        What is name of new department?
+    Remove Department
+        Choose department to be removed from list
+    Exit
 
+## Testing and Refactoring
+Testing is needed for the following circumstances
+1. The first name or last name contain a space such as Jean-Claude van Damme
+2. There is an extra space in first name or last name
+3. There should be a confirmation before removing an employee, department or role.
 
 ## MIT License
 
