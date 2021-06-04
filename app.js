@@ -45,7 +45,7 @@ const addDepartment = () => {
       connection.query('INSERT INTO department SET ?', { name: answer.new_dept }, (err) => {
         if (err) throw err;
         console.log(`The new department ${answer.new_dept} was inserted into department table successfully!`);
-        setTimeout(function(){mainMenu(); }, 1000);
+        setTimeout(function() { mainMenu(); }, 1000);
         return;
       });  // end of query insert into department
   }); // end of .then((answer))
@@ -76,14 +76,14 @@ const removeDepartment = () => {
       .prompt(delDeptQuestions)
       .then((answer) => {
         if (answer.dept == "Cancel") {
-          setTimeout(function(){mainMenu(); }, 1000);
+          setTimeout(function() { mainMenu(); }, 1000);
           return;
         }
         let query = `DELETE FROM department WHERE ${answer.dept} = department.name`;
         connection.query(query, function (err, res) {
           if (err) throw err;
           console.log(`The department ${answer.dept} was deleted from the department table successfully!`);
-          setTimeout(function(){mainMenu(); }, 1000);
+          setTimeout(function() { mainMenu(); }, 1000);
           return;
         });
       });   // End of .then
@@ -100,48 +100,40 @@ const viewAllDepartments = () => {
         values.push(val);
     });
     console.table(['ID', 'Department' ], values);
-    setTimeout(function(){mainMenu(); }, 1000);
+    setTimeout(function() { mainMenu(); }, 1000);
     return;
   });
 } // End of viewAllDepartments
 
-const removeRole = () => {
-  var roleTitles = [];
-  connection.query( 'SELECT * FROM role', (err, res) => {
+
+/*
+CREATE TABLE role (
+    role_id INT NOT NULL AUTO_INCREMENT,
+    title VARCHAR(30) NOT NULL,
+    salary VARCHAR(30) NOT NULL,
+    department_id INT NOT NULL,
+    FOREIGN KEY (department_id) REFERENCES department(department_id) ON DELETE CASCADE,
+    PRIMARY KEY (role_id)
+);
+*/
+
+const viewAllRoles = () => {
+  let query = 'SELECT role.role_id, role.title, role.salary, department.name FROM role JOIN department ON role.department_id=department.department_id'
+  connection.query(query, (err, res) => {
     if (err) throw err;
 
-    res.forEach(function(item) {
-      roleTitles.push(item.title);
+    var values = [];
+    res.forEach(({ role_id, title, salary, name }) => {
+        let val = [role_id, title, salary, name];
+        values.push(val);
     });
-    deptNames.push("Cancel");
 
-    const delRoleQuestions = [
-      {
-        type: 'list',
-        message: 'Choose role to be removed',
-        name: 'role',
-        pageSize: 15,
-        choices: roleTitles
-      }
-    ];
+    console.table(['ID', 'Role', 'Salary', 'Department' ], values);
+    setTimeout(function() { mainMenu(); }, 1000);
+    return;
 
-    inquirer
-      .prompt(delRoleQuestions)
-      .then((answer) => {
-        if (answer.role == "Cancel") {
-          setTimeout(function(){mainMenu(); }, 1000);
-          return;
-        }
-        let query = `DELETE FROM role WHERE ${answer.role} = role.title`;
-        connection.query(query, function (err, res) {
-          if (err) throw err;
-          console.log(`The role ${answer.role} was deleted from the role table successfully!`);
-          setTimeout(function(){mainMenu(); }, 1000);
-          return;
-        });
-      });   // End of .then
-  });   // End of first connection.query
-} // End of removeRoll
+  });
+}
 
 const addNewRole = () => {
   // 1. What is name of new role
@@ -214,6 +206,44 @@ const addNewRole = () => {
       });
     });
 } // End of addNewRole()
+
+const removeRole = () => {
+  var roleTitles = [];
+  connection.query( 'SELECT * FROM role', (err, res) => {
+    if (err) throw err;
+
+    res.forEach(function(item) {
+      roleTitles.push(item.title);
+    });
+    deptNames.push("Cancel");
+
+    const delRoleQuestions = [
+      {
+        type: 'list',
+        message: 'Choose role to be removed',
+        name: 'role',
+        pageSize: 15,
+        choices: roleTitles
+      }
+    ];
+
+    inquirer
+      .prompt(delRoleQuestions)
+      .then((answer) => {
+        if (answer.role == "Cancel") {
+          setTimeout(function() { mainMenu(); }, 1000);
+          return;
+        }
+        let query = `DELETE FROM role WHERE ${answer.role} = role.title`;
+        connection.query(query, function (err, res) {
+          if (err) throw err;
+          console.log(`The role ${answer.role} was deleted from the role table successfully!`);
+          setTimeout(function() { mainMenu(); }, 1000);
+          return;
+        });
+      });   // End of .then
+  });   // End of first connection.query
+} // End of removeRoll
 
 
 // To change role of employee
@@ -481,7 +511,7 @@ const viewAllEmployees = (orderBy) => {
         }
       }
       console.table(['ID', 'First name', 'Last name', 'Title', 'Department', 'Salary', 'Manager' ], values);
-      setTimeout(function(){mainMenu(); }, 1000);
+      setTimeout(function() { mainMenu(); }, 1000);
       return;
   });
 }
@@ -610,6 +640,7 @@ const mainMenu = () => {
         'Remove Employee',
         'Update Employee Role',
         'Update Employee Manager',
+        'View All Roles',
         'Add New Role',
         'Remove Role',
         'View All Departments',
@@ -648,6 +679,10 @@ const mainMenu = () => {
           updateManager();
           break;
   
+        case 'View All Roles':
+          viewAllRoles();
+          break;
+    
         case 'Add New Role':
           addNewRole();
           break;
@@ -684,6 +719,3 @@ const mainMenu = () => {
 };
 
 mainMenu();
-
-
-
