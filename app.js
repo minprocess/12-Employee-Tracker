@@ -604,7 +604,7 @@ const mainMenu = () => {
       name: 'action',
       type: 'list',
       message: 'What would you like to do?',
-      pageSize: 13,
+      pageSize: 20,
       choices: [
         'View All Employees',
         'View All Employees by Department',
