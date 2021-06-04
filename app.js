@@ -6,28 +6,26 @@ const inquirer = require('inquirer');
 
 const connection = mysql.createConnection({
   host: 'localhost',
-
-  // Your port; if not 3306
   port: 3306,
-
-  // Your username
   user: 'root',
-
-  // Be sure to update with your own MySQL password!
   password: 'Dog20cat',
   database: 'employee_db',
 });
 
-// Only for testing purposes
-const readDepartment = () => {
-  connection.query('SELECT * FROM department', (err, res) => {
+const viewAllDepartments = () => {
+  connection.query('SELECT * FROM department ORDER by department_id', (err, res) => {
     if (err) throw err;
 
-    // Log all results of the SELECT statement
-    console.log(res);
-    connection.end();
+    var values = [];
+    res.forEach(({ department_id, name }) => {
+        let val = [department_id, name];
+        values.push(val);
+    });
+    console.table(['ID', 'Department' ], values);
+    setTimeout(function() { mainMenu(); }, 1000);
+    return;
   });
-};
+} // End of viewAllDepartments
 
 const addDepartment = () => {
 
@@ -79,7 +77,7 @@ const removeDepartment = () => {
           setTimeout(function() { mainMenu(); }, 1000);
           return;
         }
-        let query = `DELETE FROM department WHERE ${answer.dept} = department.name`;
+        let query = `DELETE FROM department WHERE department.name = "${answer.dept}"`;
         connection.query(query, function (err, res) {
           if (err) throw err;
           console.log(`The department ${answer.dept} was deleted from the department table successfully!`);
@@ -89,21 +87,6 @@ const removeDepartment = () => {
       });   // End of .then
   });   // End of first connection.query
 } // End of removeDepartment
-
-const viewAllDepartments = () => {
-  connection.query('SELECT * FROM department', (err, res) => {
-    if (err) throw err;
-
-    var values = [];
-    res.forEach(({ id, name }) => {
-        let val = [id, name];
-        values.push(val);
-    });
-    console.table(['ID', 'Department' ], values);
-    setTimeout(function() { mainMenu(); }, 1000);
-    return;
-  });
-} // End of viewAllDepartments
 
 const viewAllRoles = () => {
   let query = 'SELECT role.role_id, role.title, role.salary, department.name FROM role JOIN department ON role.department_id=department.department_id ';
