@@ -39,6 +39,7 @@ The list below shows the menu of actions that can be taken and for each action w
 &nbsp;&nbsp;&nbsp;&nbsp;Change Manager of Employee  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose employee with new manager from list  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose new manager from list  
+&nbsp;&nbsp;&nbsp;&nbsp;View All Roles  
 &nbsp;&nbsp;&nbsp;&nbsp;Add New Role  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is name of new role?  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is salary?  
