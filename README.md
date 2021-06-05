@@ -2,34 +2,15 @@
 
 ## Description
 
-This is a command-line application that allows the user to interface with a database with company employees.
+This is a command-line application that allows the user to interact with a mySQL database containing three tables of employee information. The database name is employee_db and the three tables are: employee, role and department. The user interacts with the database through inquirer.  
 
-## Minimum Viable Product
-Feature | Implemented
----|---|
-Add departments | No
-Add roles | Yes
-Add employees Yes
-View departments | No
-View roles | No
-View employees | Yes
-Update employee roles | Yes
+There is a movie in the assets folder that shows all of the available commands be run in inquirer. The link to this movie is  
 
-Bonus features
-Feature | Implemented
----|---|
-Delete Employees | Yes
+(https://github.com/minprocess/12-Employee-Tracker/blob/main/assets/Recording_of_Employee_Tracker.mp4)
 
-The code in this application could be improved quite a bit. It could be shortend a lot, I think. I will have to do that as well as add the MVP features I couldn't implment then resubmit
-## Table of Contents
-
-- [Installation](#installation)
-- [Usage](#usage)
-- [Credits](#credits)
-- [License](#license)
 ## Installation
-Clone this project to your PC. Install mysql and Workbench. Use npm i to install dependencies which are inquirer, mysql and console.table
-Here is the link to the GitHub repo. The GitHub repo will have a mp4 recording of the app being used.
+Clone this project to your PC. Use the command `npm i` to install mysql2, inquirer and console.table. schema.sql can be used to seed the database through Workbench.  
+Here is the link to the GitHub repo. The GitHub repo will have a mp4 recording of the app being used.  
 
 [https://github.com/minprocess/12-Employee-Tracker](https://github.com/minprocess/12-Employee-Tracker)
 
@@ -37,38 +18,39 @@ The MP4 recording is in the assets folder.
 ## Usage
 First copy the contents of schema.sql into an empty query tab in Workbench and create the employee, role and department tables.
 Start the app with the command `node app`.
-You will be presented with the following choices
-![Main menu of Employee Tracker](./assets/Main_menu_of_Employee-Tracker.png)
+You will be presented with the following choices<br>
+<br>
+![Main menu of Employee Tracker](./assets/Main_menu_of_Employee_Tracker.png)
 
-The list below shows the menu of actions that can be taken and for each action what questions or list the user may see.
-    View All Employees
-    View All Employees by Department
-    View All Employees by Manager
-    Add Employee
-        Employee's first name?
-        Employee's last name?
-        Choose employee's role from list
-        Choose employee's manager from list
-    Remove Employee
-        Chose employee from list
-    Change Role of Employee
-        Choose employee with new role from list
-        Chose new role of employee from list
-    Change Manager of Employee
-        Choose employee with new manager from list
-        Choose new manager from list
-    Add New Role
-        What is name of new role?
-        What is salary?
-        Choose department from list
-    Remove Role
-        Choose role to be removed from list
-    View All Departments
-    Add Department
-        What is name of new department?
-    Remove Department
-        Choose department to be removed from list
-    Exit
+The list below shows the menu of actions that can be taken and for each action what questions or list the user may see.  
+&nbsp;&nbsp;&nbsp;&nbsp;View All Employees  
+&nbsp;&nbsp;&nbsp;&nbsp;View All Employees by Department  
+&nbsp;&nbsp;&nbsp;&nbsp;View All Employees by Manager  
+&nbsp;&nbsp;&nbsp;&nbsp;Add Employee  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Employee's first name?  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Employee's last name?  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose employee's role from list  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose employee's manager from list  
+&nbsp;&nbsp;&nbsp;&nbsp;Remove Employee  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chose employee from list  
+&nbsp;&nbsp;&nbsp;&nbsp;Change Role of Employee  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose employee with new role from list  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Chose new role of employee from list  
+&nbsp;&nbsp;&nbsp;&nbsp;Change Manager of Employee  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose employee with new manager from list  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose new manager from list  
+&nbsp;&nbsp;&nbsp;&nbsp;Add New Role  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is name of new role?  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is salary?  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose department from list  
+&nbsp;&nbsp;&nbsp;&nbsp;Remove Role  
+&nbsp;&nbsp;&nbsp;&nbsp;Choose role to be removed from list  
+&nbsp;&nbsp;&nbsp;&nbsp;View All Departments  
+&nbsp;&nbsp;&nbsp;&nbsp;Add Department  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;What is name of new department?  
+&nbsp;&nbsp;&nbsp;&nbsp;Remove Department  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Choose department to be removed from list  
+&nbsp;&nbsp;&nbsp;&nbsp;Exit  
 
 Caution! If Remove Department command is chosen then the employees in that department will be deleted from the table! Similarly removing a role will delete employees having that role from the database.
 
