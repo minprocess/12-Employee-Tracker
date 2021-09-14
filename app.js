@@ -42,7 +42,6 @@ const addDepartment = () => {
     .then((answer) => {
       connection.query('INSERT INTO department SET ?', { name: answer.new_dept }, (err) => {
         if (err) throw err;
-        console.log(`The new department ${answer.new_dept} was inserted into department table successfully!`);
         setTimeout(function() { mainMenu(); }, 1000);
         return;
       });  // end of query insert into department
@@ -80,7 +79,6 @@ const removeDepartment = () => {
         let query = `DELETE FROM department WHERE department.name = "${answer.dept}"`;
         connection.query(query, function (err, res) {
           if (err) throw err;
-          console.log(`The department ${answer.dept} was deleted from the department table successfully!`);
           setTimeout(function() { mainMenu(); }, 1000);
           return;
         });

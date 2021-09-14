@@ -9,12 +9,13 @@ There is a movie in the assets folder that shows all of the available commands b
 (https://github.com/minprocess/12-Employee-Tracker/blob/main/assets/Recording_of_Employee_Tracker.mp4)
 
 ## Installation
-Clone this project to your PC. Use the command `npm i` to install mysql2, inquirer and console.table. schema.sql can be used to seed the database through Workbench.  
+Clone this project to your PC. Use the command `npm i` to install mysql, inquirer and console.table. schema.sql can be used to seed the database through Workbench.  
 Here is the link to the GitHub repo. The GitHub repo will have a mp4 recording of the app being used.  
 
 [https://github.com/minprocess/12-Employee-Tracker](https://github.com/minprocess/12-Employee-Tracker)
 
 The MP4 recording is in the assets folder.
+
 ## Usage
 First copy the contents of schema.sql into an empty query tab in Workbench and create the employee, role and department tables.
 Start the app with the command `node app`.
